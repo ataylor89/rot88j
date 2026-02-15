@@ -14,6 +14,7 @@ import org.apache.commons.cli.ParseException;
 public class Main {
 
     private Rot88 rot88;
+    private final String HELP_MESSAGE = "Usage: rot88.java [-h] [-i INPUTFILE] [-o OUTPUTFILE] [message]";
 
     public Main() {
         rot88 = new Rot88();
@@ -21,17 +22,23 @@ public class Main {
 
     public Options buildOptions() {
         Options options = new Options();
+        options.addOption(Option.builder("h")
+            .longOpt("help")
+            .desc("Print the help message")
+            .hasArg(false)
+            .required(false)
+            .build());
         options.addOption(Option.builder("i")
             .longOpt("inputfile")
             .desc("The path to the input file")
-            .hasArg()
+            .hasArg(true)
             .type(String.class)
             .required(false)
             .build());
         options.addOption(Option.builder("o")
             .longOpt("outfile")
             .desc("The path to the output file")
-            .hasArg()
+            .hasArg(true)
             .type(String.class)
             .required(false)
             .build());
@@ -44,7 +51,11 @@ public class Main {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options, args);
         String[] positionalArgs = cmd.getArgs();
-        if (positionalArgs.length == 1) {
+        if (cmd.hasOption("h")) {
+            System.out.println(HELP_MESSAGE);
+            return;
+        }
+        else if (positionalArgs.length == 1) {
             input = positionalArgs[0];
         }
         else if (cmd.hasOption("i")) {
@@ -53,7 +64,8 @@ public class Main {
             input = Files.readString(path);
         }
         else {
-            throw new IllegalArgumentException("The command-line arguments are missing an input string or a path to an input file");
+            System.out.println(HELP_MESSAGE);
+            return;
         }
         String output = rot88.rot88(input);
         if (cmd.hasOption("o")) {
